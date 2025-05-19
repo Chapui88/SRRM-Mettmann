@@ -63,18 +63,31 @@
         overflow-y: auto;
       }
       
-       html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; }
-    .toolbar { position: absolute; top: 10px; left: 50px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 6px; z-index: 1000; }
-    .toolbar button { margin: 5px; }   
-    .toolbar button.active {
-      background-color: #007bff;
-      color: white;
-      border: 2px solid #0056b3;
-    }
-     
-     
-     
-     .tooltip {
+html, body, #map {
+  margin: 0; padding: 0; width: 100%; height: 100%;
+}
+
+.toolbar {
+  position: absolute;
+  bottom: 10px;    /* statt top: 10px */
+  left: 10px;      /* statt left: 50px */
+  background: rgba(255,255,255,0.8);
+  padding: 10px;
+  border-radius: 6px;
+  z-index: 1000;
+}
+
+.toolbar button {
+  margin: 5px;
+}
+
+.toolbar button.active {
+  background-color: #007bff;
+  color: white;
+  border: 2px solid #0056b3;
+}
+
+.tooltip {
   position: absolute;
   background: rgba(0, 0, 0, 0.7);
   color: #fff;
@@ -85,7 +98,7 @@
   font-size: 12px;
   display: none;
 }
-      
+
 #toggleLayer.red {
   background-color: #e74c3c; /* rot */
   color: white;
@@ -95,6 +108,8 @@
   background-color: #27ae60; /* grün */
   color: white;
 }
+      
+      
       
     </style>
   </head>
@@ -127,24 +142,109 @@
 
 
 <div id="tooltip" class="tooltip"></div>
-  <div id="map"></div>
+<div id="map" style="width: 100%; height: 100%; position: relative;">
+  <!-- Logos Container -->
+  <div style="position: absolute; right: 20px; bottom: 20px; z-index: 999; display: flex; gap: 20px; align-items: center;">
+    <!-- Logos hier -->
+  </div>
+</div>
+
+<!-- Anleitung-Button unter der Karte -->
+<div style="position: absolute; top: 8px; left: 40px; z-index: 1100; display: flex; gap: 10px;">
+  <!-- Anleitung Button -->
+  <button id="openGuide">Anleitung</button>
+
+  <!-- Kontakt Button -->
+  <button id="openContact">Kontakt</button>
+</div>
+
+
+<!-- Modal Overlay bleibt wie gehabt -->
+<div id="guideModal" style="
+  display:none;
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  justify-content: center;
+  align-items: center;
+">
+  <div style="
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 500px;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
+    position: relative;
+  ">
+<h2>Anleitung zur App</h2>
+
+<p style="text-align: center;">
+  Vielen Dank für Ihr Interesse an der Hinweiskarte zur Starkregengefahrenkarte des Kreises Mettmann.<br><br> 
+  <b>So funktioniert's:</b><br>
+  Sie können mit dieser Anwendung einen Hinweis zur Verbesserung der Starkregengefahrenkarte des Kreises Mettmann erstellen.
+</p>
+
+<p style="text-align: left; margin-top: 20px;">
+  <b>Hierzu gehen Sie wie folgt vor:</b><br><br>
+  <b>1.</b> <span style="margin-left: 10px;">Klicken Sie auf "Punkt einzeichnen" im unteren rechten Teil der Anwendung.</span><br>
+  <b>2.</b> <span style="margin-left: 10px;">Fügen Sie den Punkt auf der Karte ein, indem Sie einen Ort auf der Karte anklicken.</span><br>
+  <b>3.</b> <span style="margin-left: 10px;">Optional können Sie Ihren Hinweis beschreiben und sich als Bearbeiter angeben.</span>
+</p>
+
+<p style="text-align: left; margin-top: 20px;">
+  <b>Falls Ihnen bei der Anwendung ein Fehler unterläuft und Sie einen Punkt löschen müssen, folgen Sie diesen Schritten:</b><br><br>
+  <b>1.</b> <span style="margin-left: 10px;">Klicken Sie auf "Punkt löschen" im unteren rechten Teil der Anwendung.</span><br>
+  <b>2.</b> <span style="margin-left: 10px;">Klicken Sie auf den Punkt, den Sie löschen möchten.</span><br>
+  <b>3.</b> <span style="margin-left: 10px;">Bestätigen Sie, dass Sie den Punkt löschen möchten mit "OK".</span>
+</p>
+
+<p style="text-align: center; margin-top: 20px;">
+  Viel Spaß beim Erkunden und Nutzen der Hinweiskarte!
+</p>
+
+    <button id="closeGuide" style="
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ccc;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+    ">Schließen</button>
+  </div>
+</div>
+
+  
+<!-- Kontakt Modal -->
+<div id="contactModal" style="display:none; position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); z-index: 2000; justify-content: center; align-items: center;">
+  <div style="background: white; padding: 20px; border-radius: 8px; max-width: 400px; position: relative;">
+    <h2>Kontaktpersonen</h2>
+    <ul style="list-style-type: none; padding-left: 0;">
+      <li><a href="mailto:jens.schmidt@kreis-mettmann.de">Jens Schmidt</a> Kreis Mettmann</li>
+      <li><a href="mailto:hendrik.jansen@pecher.de">Hendrik Jansen</a> Pecher AG</li>
+      <li><a href="mailto:marcjansen@kommunanagentur.nrw">Marc Jansen</a> Kommunal Agentur NRW</li>
+    </ul>
+    <button id="closeContact" style="position: absolute; top: 10px; right: 10px;">Schließen</button>
+  </div>
+</div>
+
   
   
-   
-      <a href="https://www.maptiler.com" style="position:absolute;left:10px;bottom:10px;z-index:999;">
-       <!-- <img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo" />-->
-          <img class="jpg"  src="https://www.kreis-mettmann.de/media/custom/3718_736_1_m.JPG?1728477602" style="left:10px;bottom:10px;z-index:999;height: 40px" align="middle"  alt="Logo Kreis Mettmann" title="Logo Kreis Mettmann">
+</div>
 
-                  <img class="jpg"  src="https://kommunalagentur.nrw/wp-content/themes/kua-theme/dist/images/logo.png" style="left:10px;bottom:10px;z-index:999;height: 40px" align="middle"  alt="Logo Kommunal Agentur NRW" title="ogo Kommunal Agentur NRW">
-
-      </a>
-    </div>
 
     <div id="search-container">
       <input type="text" id="addressInput" placeholder="Adresse eingeben" />
       <button id="searchBtn">Suchen</button>
       <div id="result"></div>
     </div>
+
+
+
+
 
     <script>
     
@@ -157,7 +257,7 @@
   }
     
     
-      const key = 'EdafZNDsmwFgAOzJWLIw';
+ const key = 'EdafZNDsmwFgAOzJWLIw';
 
       const attribution = new ol.control.Attribution({
         collapsible: false,
@@ -193,7 +293,7 @@ const resolutions = matrixIds.map(z => {
 const wmtsLayer = new ol.layer.Tile({
    opacity: 0.8, // 50% transparent
   source: new ol.source.WMTS({
-    url: `https://api.maptiler.com/tiles/0196e2d3-a5ae-71f0-b27b-591217acd8e6/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
+    url: `https://api.maptiler.com/tiles/0196e918-3756-7629-a252-84dc2cf0f059/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
     layer: 'Ohne Versickerung',
     matrixSet: 'GoogleMapsCompatible256-z9-14',
     format: 'image/webp',
@@ -214,9 +314,9 @@ const wmtsLayerMitVersickerung = new ol.layer.Tile({
   opacity: 0.8,
   visible: false, // Anfangs ausgeblendet
   source: new ol.source.WMTS({
-    url: `https://api.maptiler.com/tiles/0196e2cf-4838-7137-9a9e-6feaabc1da45/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
-    layer: 'Mit Versickerung',
-    matrixSet: 'GoogleMapsCompatible256-z9-14',
+    url: `https://api.maptiler.com/tiles/0196e915-baef-7ed1-ab53-1026bd845c97/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
+    layer: 'tiles/0196e915-baef-7ed1-ab53-1026bd845c97',
+    matrixSet: 'GoogleMapsCompatible256-z10-14',
     format: 'image/webp',
     style: 'default',
     wrapX: true,
@@ -231,6 +331,7 @@ const wmtsLayerMitVersickerung = new ol.layer.Tile({
 });
 
 
+
 const view = new ol.View({
   center: ol.proj.fromLonLat([6.96583, 51.22848]), // z. B. Düsseldorf
   zoom: 16,
@@ -240,7 +341,6 @@ const view = new ol.View({
     'EPSG:3857'
   )
 });
-
       
 
       const osmLayer = new ol.layer.Tile({
@@ -249,7 +349,7 @@ const view = new ol.View({
 
       const map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, wmtsLayer, wmtsLayerMitVersickerung],
+        layers: [osmLayer, wmtsLayer, wmtsLayerMitVersickerung], 
         controls: ol.control.defaults.defaults({attribution: false}).extend([attribution]),
         view: view
       });
@@ -338,17 +438,34 @@ const vectorLayer = new ol.layer.Vector({
 
      const vectorLayer2 = new ol.layer.Vector({
        source: vectorSource2,
-       style: new ol.style.Style({
-         stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
-         fill: new ol.style.Fill({ color: 'rgba(255, 0, 0, 0.5)' }),
-         image: new ol.style.Circle({ radius: 5, fill: new ol.style.Fill({ color: 'orange' }) })
-       })
+              style: new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 4,
+                  fill: new ol.style.Fill({ color: 'orange' }),
+                  stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+                })
+              })
      });
                            
-      
+  
+  
+     const datasetId2_1 = '0196e84b-6882-793c-af28-95478ef8ad27';
 
+     const vectorSource2_1 = new ol.source.Vector({
+       url: `https://api.maptiler.com/data/${datasetId2_1}/features.json?key=${apiKey}`,
+       format: format
+     });
 
-
+     const vectorLayer2_1 = new ol.layer.Vector({
+       source: vectorSource2_1,
+              style: new ol.style.Style({
+                image: new ol.style.Circle({
+                  radius: 4,
+                  fill: new ol.style.Fill({ color: 'red' }),
+                  stroke: new ol.style.Stroke({ color: 'white', width: 2 })
+                })
+              })
+     });
 ///////////////////////////////////////////////////////////////////////////////
     
 const wfsURL = 'https://maps.kommunalagentur.nrw/geoserver/StarkregenRheinbach/ows';
@@ -375,7 +492,7 @@ const vectorLayer3 = new ol.layer.Vector({
     image: new ol.style.Circle({
       radius: 6,
       fill: new ol.style.Fill({ color: 'blue' }),
-      stroke: new ol.style.Stroke({ color: 'white', width: 1 })
+      stroke: new ol.style.Stroke({ color: 'white', width:2 })
     })
   })
 });
@@ -565,6 +682,7 @@ function DelselectElement(id, valueToSelect) {
                     
 map.addLayer(vectorLayer);
 map.addLayer(vectorLayer2);
+map.addLayer(vectorLayer2_1);
 
 
 
@@ -587,6 +705,16 @@ map.on('pointermove', function (evt) {
     if (!feature) return;
 
     const properties = feature.getProperties();
+
+    if (layer === vectorLayer) {
+      info += '<b>Verrohrung</b><br>';
+    } else if (layer === vectorLayer2) {
+      info += '<b>Hinweis BRW</b><br>';
+    } else if (layer === vectorLayer2_1) {
+      info += '<b>Digitales Geländemodell modifiziert</b><br>';
+    } else if (layer === vectorLayer3) {
+      info += '<b>Hinweis Kommune</b><br>';
+    }
 
     if (layer === vectorLayer3) {
       // Nur bestimmte Felder anzeigen mit Labels
@@ -625,6 +753,8 @@ map.on('pointermove', function (evt) {
     map.getTargetElement().style.cursor = '';
   }
 });
+
+
 
 
 
@@ -691,7 +821,50 @@ opacitySlider.addEventListener('input', () => {
 const initialOpacity = parseFloat(opacitySlider.value);
 getActiveWMTSLayer().setOpacity(initialOpacity);
 opacityValue.textContent = Math.round(initialOpacity * 100) + '%';   
-      
+ 
+ 
+ 
+ 
+ 
+ 
+const openBtn = document.getElementById('openGuide');
+const modal = document.getElementById('guideModal');
+const closeBtn = document.getElementById('closeGuide');
+
+openBtn.addEventListener('click', () => {
+  modal.style.display = 'flex';  // Modal sichtbar machen und zentrieren
+});
+
+closeBtn.addEventListener('click', () => {
+  modal.style.display = 'none';  // Modal verstecken
+});
+
+// Optional: Schließen, wenn außerhalb des Modals geklickt wird
+modal.addEventListener('click', (e) => {
+  if (e.target === modal) {
+    modal.style.display = 'none';
+  }
+});
+
+
+
+
+// Anleitung
+document.getElementById('openGuide').addEventListener('click', () => {
+  document.getElementById('guideModal').style.display = 'flex';
+});
+document.getElementById('closeGuide').addEventListener('click', () => {
+  document.getElementById('guideModal').style.display = 'none';
+});
+
+// Kontakt
+document.getElementById('openContact').addEventListener('click', () => {
+  document.getElementById('contactModal').style.display = 'flex';
+});
+document.getElementById('closeContact').addEventListener('click', () => {
+  document.getElementById('contactModal').style.display = 'none';
+});
+     
     </script>
   </body>
 </html>
