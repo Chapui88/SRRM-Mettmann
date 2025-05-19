@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>MapTiler + OSM Layer mit Adresssuche</title>
+
+<!-- OpenLayers 10.1.0 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@10.1.0/ol.css">
+<script src="https://cdn.jsdelivr.net/npm/ol@10.1.0/dist/ol.js"></script>
+
+<!-- Proj4JS (kompatibel mit OL 10) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+
+<script>
+  // EPSG:25832 definieren
+  proj4.defs("EPSG:25832", "+proj=utm +zone=32 +ellps=GRS80 +units=m +no_defs");
+
+  // Bei OpenLayers registrieren
+  ol.proj.proj4.register(proj4); // <-- Richtig! NICHT setProj4
+
+  // Optional testen
+  const myProj = ol.proj.get('EPSG:25832');
+  if (myProj) {
+    console.log('EPSG:25832 korrekt geladen:', myProj.getCode());
+  } else {
+    console.error('EPSG:25832 konnte nicht registriert werden.');
+  }
+</script>
+
+
+    <style>
+      html, body {
+        margin: 0; padding: 0; height: 100%;
+        font-family: Arial, sans-serif;
+      }
+      #map { position: absolute; top: 0; right: 0; bottom: 0; left: 0; }
+      #search-container {
+        position: absolute;
+        top: 10px;
+        right: 10px;       /* Verschoben nach oben rechts */
+        background: rgba(255,255,255,0.9);
+        padding: 6px 8px;
+        border-radius: 4px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        z-index: 1000;
+        width: 250px;      /* Etwas schmaler */
+      }
+      #addressInput {
+        width: 170px;
+        padding: 4px;
+        font-size: 13px;
+      }
+      #searchBtn {
+        padding: 4px 6px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      #result {
+        margin-top: 6px;
+        font-size: 11px;    /* Kleinere Schrift für Ergebnis */
+        color: #333;
+        max-height: 50px;
+        overflow-y: auto;
+      }
+      
+       html, body, #map { margin: 0; padding: 0; width: 100%; height: 100%; }
+    .toolbar { position: absolute; top: 10px; left: 50px; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 6px; z-index: 1000; }
+    .toolbar button { margin: 5px; }   
+    .toolbar button.active {
+      background-color: #007bff;
+      color: white;
+      border: 2px solid #0056b3;
+    }
+     
+     
+     
+     .tooltip {
+  position: absolute;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+  font-size: 12px;
+  display: none;
+}
+      
+#toggleLayer.red {
+  background-color: #e74c3c; /* rot */
+  color: white;
+}
+
+#toggleLayer.green {
+  background-color: #27ae60; /* grün */
+  color: white;
+}
+      
+    </style>
+  </head>
+  <body>
+<div class="toolbar">
+  <button id="draw">Zeichnen</button>
+  <button id="delete">Löschen</button>
+  
+   <button id="toggleLayer">Mit Versickerung: Aus</button>
+   
+<div style="margin-top:10px;">
+  <label for="opacitySlider">Deckkraft:</label>
+  <input type="range" id="opacitySlider" min="0" max="1" step="0.1" value="0.8">
+  <span id="opacityValue">80%</span>
+</div>
+   
+</div>
+
+<div id="popup-form" style="display: none; position: absolute; background: white; padding: 10px; border: 1px solid #999; z-index: 1000; box-shadow: 2px 2px 6px rgba(0,0,0,0.3);">
+  <label>Beschreibung:</label><br>
+  <input type="text" id="popup-description" style="width: 200px;"><br><br>
+
+  <label>Bearbeiter:</label><br>
+  <input type="text" id="popup-username" style="width: 200px;"><br><br>
+
+  <button id="popup-save">Speichern</button>
+  <button id="popup-cancel">Abbrechen</button>
+</div>
+
+
+
+<div id="tooltip" class="tooltip"></div>
+  <div id="map"></div>
+  
+  
+   
+      <a href="https://www.maptiler.com" style="position:absolute;left:10px;bottom:10px;z-index:999;">
+       <!-- <img src="https://api.maptiler.com/resources/logo.svg" alt="MapTiler logo" />-->
+          <img class="jpg"  src="https://www.kreis-mettmann.de/media/custom/3718_736_1_m.JPG?1728477602" style="left:10px;bottom:10px;z-index:999;height: 40px" align="middle"  alt="Logo Kreis Mettmann" title="Logo Kreis Mettmann">
+
+                  <img class="jpg"  src="https://kommunalagentur.nrw/wp-content/themes/kua-theme/dist/images/logo.png" style="left:10px;bottom:10px;z-index:999;height: 40px" align="middle"  alt="Logo Kommunal Agentur NRW" title="ogo Kommunal Agentur NRW">
+
+      </a>
+    </div>
+
+    <div id="search-container">
+      <input type="text" id="addressInput" placeholder="Adresse eingeben" />
+      <button id="searchBtn">Suchen</button>
+      <div id="result"></div>
+    </div>
+
+    <script>
+    
+    function setActiveButton(buttonId) {
+  document.querySelectorAll('.toolbar button').forEach(btn => btn.classList.remove('active'));
+  if (buttonId) {
+    const btn = document.getElementById(buttonId);
+    if (btn) btn.classList.add('active');
+  }
+  }
+    
+    
+      const key = 'EdafZNDsmwFgAOzJWLIw';
+
+      const attribution = new ol.control.Attribution({
+        collapsible: false,
+      });
+
+      const maptilerSource = new ol.source.TileJSON({
+        url: `https://api.maptiler.com/tiles/0196d83a-7729-7f95-a96b-014210c80d90/tiles.json?key=${key}`,
+        
+        tileSize: 512,
+        crossOrigin: 'anonymous'
+      });
+
+      const mapTilerLayer = new ol.layer.Tile({
+        source: maptilerSource
+      });
+      
+      
+      
+     
+const projection = ol.proj.get('EPSG:3857');
+const projectionExtent = projection.getExtent();
+
+// Zoomlevel 9 bis 14
+const matrixIds = ['9', '10', '11', '12', '13', '14'];
+
+// Berechnung der Resolutions für die Zoomlevel 9-14
+const resolutions = matrixIds.map(z => {
+  // Maßstab aus ScaleDenominator * Standard DPI-Konvertierung
+  // Einfachheitshalber hier annähernd per Formel:
+  return (156543.03392804097 / Math.pow(2, z)); // Standard WebMercator Auflösung pro Zoomstufe
+});
+
+const wmtsLayer = new ol.layer.Tile({
+   opacity: 0.8, // 50% transparent
+  source: new ol.source.WMTS({
+    url: `https://api.maptiler.com/tiles/0196e2d3-a5ae-71f0-b27b-591217acd8e6/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
+    layer: 'Ohne Versickerung',
+    matrixSet: 'GoogleMapsCompatible256-z9-14',
+    format: 'image/webp',
+    style: 'default',
+    wrapX: true,
+    requestEncoding: 'REST',  // <-- DAS ist wichtig
+    tileGrid: new ol.tilegrid.WMTS({
+      origin: ol.extent.getTopLeft(projection.getExtent()),
+      resolutions: resolutions,
+      matrixIds: matrixIds,
+      tileSize: 256
+    })
+  }),
+});
+
+
+const wmtsLayerMitVersickerung = new ol.layer.Tile({
+  opacity: 0.8,
+  visible: false, // Anfangs ausgeblendet
+  source: new ol.source.WMTS({
+    url: `https://api.maptiler.com/tiles/0196e2cf-4838-7137-9a9e-6feaabc1da45/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
+    layer: 'Mit Versickerung',
+    matrixSet: 'GoogleMapsCompatible256-z9-14',
+    format: 'image/webp',
+    style: 'default',
+    wrapX: true,
+    requestEncoding: 'REST',
+    tileGrid: new ol.tilegrid.WMTS({
+      origin: ol.extent.getTopLeft(projection.getExtent()),
+      resolutions: resolutions,
+      matrixIds: matrixIds,
+      tileSize: 256
+    })
+  })
+});
+
+
+const view = new ol.View({
+  center: ol.proj.fromLonLat([6.96583, 51.22848]), // z. B. Düsseldorf
+  zoom: 16,
+  extent: ol.proj.transformExtent(
+    [6.70, 51.00, 7.40, 51.50],  // [minLon, minLat, maxLon, maxLat]
+    'EPSG:4326',
+    'EPSG:3857'
+  )
+});
+
+      
+
+      const osmLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+
+      const map = new ol.Map({
+        target: 'map',
+        layers: [osmLayer, wmtsLayer, wmtsLayerMitVersickerung],
+        controls: ol.control.defaults.defaults({attribution: false}).extend([attribution]),
+        view: view
+      });
+      
+      
+      
+ 
+
+      const searchBtn = document.getElementById('searchBtn');
+      const addressInput = document.getElementById('addressInput');
+      const result = document.getElementById('result');
+
+      searchBtn.addEventListener('click', () => {
+        const address = addressInput.value.trim();
+        if (!address) {
+          result.textContent = 'Bitte gib eine Adresse ein.';
+          return;
+        }
+        result.textContent = 'Suche...';
+
+        const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}`;
+
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.length === 0) {
+              result.textContent = 'Keine Ergebnisse gefunden.';
+              return;
+            }
+            const place = data[0];
+
+            result.innerHTML = `<b>${place.display_name}</b><br>Lat: ${place.lat}, Lon: ${place.lon}`;
+
+            const lon = parseFloat(place.lon);
+            const lat = parseFloat(place.lat);
+            const coord = ol.proj.fromLonLat([lon, lat]);
+
+            map.getView().animate({
+              center: coord,
+              zoom: 18,
+              duration: 1000
+            });
+          })
+          .catch(err => {
+            result.textContent = 'Fehler bei der Suche: ' + err.message;
+          });
+      });
+
+      addressInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          searchBtn.click();
+        }
+      });
+      
+      
+ 
+
+
+
+const apiKey = 'EdafZNDsmwFgAOzJWLIw';
+const datasetId = '0196ddb1-78a1-793f-8dee-837a2540c8e0';
+
+const format = new ol.format.GeoJSON();
+const vectorSource = new ol.source.Vector({
+  url: `https://api.maptiler.com/data/${datasetId}/features.json?key=${apiKey}`,
+  format: format
+});
+
+const vectorLayer = new ol.layer.Vector({
+  source: vectorSource,
+  style: new ol.style.Style({
+    stroke: new ol.style.Stroke({ color: 'red', width: 2 }),
+    fill: new ol.style.Fill({ color: 'rgba(0, 0, 255, 0.1)' }),
+    image: new ol.style.Circle({ radius: 5, fill: new ol.style.Fill({ color: 'blue' }) })
+  })
+});
+      
+      
+      
+     const datasetId2 = '0196e2d7-99cc-7bcf-bf24-fd1f56a236d3';
+
+     const vectorSource2 = new ol.source.Vector({
+       url: `https://api.maptiler.com/data/${datasetId2}/features.json?key=${apiKey}`,
+       format: format
+     });
+
+     const vectorLayer2 = new ol.layer.Vector({
+       source: vectorSource2,
+       style: new ol.style.Style({
+         stroke: new ol.style.Stroke({ color: 'white', width: 2 }),
+         fill: new ol.style.Fill({ color: 'rgba(255, 0, 0, 0.5)' }),
+         image: new ol.style.Circle({ radius: 5, fill: new ol.style.Fill({ color: 'orange' }) })
+       })
+     });
+                           
+      
+
+
+
+///////////////////////////////////////////////////////////////////////////////
+    
+const wfsURL = 'https://maps.kommunalagentur.nrw/geoserver/StarkregenRheinbach/ows';
+
+// Quelle für GeoJSON-Features (WFS)
+const vectorSource3 = new ol.source.Vector({
+  format: new ol.format.GeoJSON(),
+  url: function (extent) {
+    return `${wfsURL}?service=WFS&version=1.0.0&request=GetFeature&typeName=StarkregenRheinbach:Schadenereignisse&outputFormat=application/json&srsname=EPSG:3857&bbox=${extent.join(',')},EPSG:3857`;
+  },
+  strategy: ol.loadingstrategy.bbox
+});
+
+// IDs beim Laden setzen
+vectorSource3.on('addfeature', function (e) {
+  const feature = e.feature;
+  console.log('Feature-ID:', feature.getId());
+});
+
+// Layer anlegen
+const vectorLayer3 = new ol.layer.Vector({
+  source: vectorSource3,
+  style: new ol.style.Style({
+    image: new ol.style.Circle({
+      radius: 6,
+      fill: new ol.style.Fill({ color: 'blue' }),
+      stroke: new ol.style.Stroke({ color: 'white', width: 1 })
+    })
+  })
+});
+
+map.addLayer(vectorLayer3);
+
+// ----------------------------------------------------------------------------
+// Interaktionen vorbereiten
+const snap = new ol.interaction.Snap({ source: vectorSource3 });
+
+const selectInteraction = new ol.interaction.Select({
+  layers: [vectorLayer3]
+});
+
+
+
+// ----------------------------------------------------------------------------
+// Interaktionen zurücksetzen
+function removeInteractions() {
+  console.log("Alle aktiven Interaktionen werden entfernt");
+  map.getInteractions().forEach(i => {
+    if (
+      i instanceof ol.interaction.Draw ||
+      i instanceof ol.interaction.Select ||
+      i instanceof ol.interaction.Snap
+    ) {
+      map.removeInteraction(i);
+    }
+  });
+}
+
+// ----------------------------------------------------------------------------
+// WFS-T Transaktion (Insert / Update / Delete)
+const formatWFS = new ol.format.WFS();
+const formatGML = new ol.format.GML({
+  featureNS: 'https://maps.kommunalagentur.nrw/geoserver/StarkregenRheinbach',
+  featureType: 'Schadenereignisse',
+  srsName: 'EPSG:25832'
+});
+
+function transactWFS(mode, feature) {
+  const clone = feature.clone();
+  clone.setId(feature.getId()); // <--- WICHTIG!
+  clone.setGeometry(clone.getGeometry().clone().transform('EPSG:3857', 'EPSG:25832'));
+
+  // Logging einfügen – direkt danach!
+  console.log("WFS-T Feature-ID für Modus", mode, ":", clone.getId());
+
+  let node;
+  if (mode === 'insert') {
+    node = formatWFS.writeTransaction([clone], null, null, formatGML);
+  } else if (mode === 'update') {
+    node = formatWFS.writeTransaction(null, [clone], null, formatGML);
+  } else if (mode === 'delete') {
+    node = formatWFS.writeTransaction(null, null, [clone], formatGML);
+  }
+
+  const payload = new XMLSerializer().serializeToString(node);
+
+  fetch(wfsURL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/xml' },
+    body: payload
+  }).then(response => {
+    if (!response.ok) {
+      console.error('WFS-T Fehler:', response.statusText);
+    } else {
+      console.log(`WFS-T erfolgreich: ${mode}`);
+      vectorSource3.clear();
+      vectorSource3.refresh();
+    }
+  });
+}
+
+// ----------------------------------------------------------------------------
+// Draw-Button
+document.getElementById('draw').addEventListener('click', () => {
+  setActiveButton('draw'); // Button visuell aktiv setzen
+  removeInteractions(); // Entfernt andere Interaktionen
+
+  const drawInteraction = new ol.interaction.Draw({
+    source: vectorSource3,
+    type: 'Point',
+    geometryName: 'geom'
+  });
+
+  map.addInteraction(drawInteraction);
+
+  drawInteraction.on('drawend', (event) => {
+    const feature = event.feature;
+    feature.setId('user_' + Date.now());
+
+    const coordinate = feature.getGeometry().getCoordinates();
+    const pixel = map.getPixelFromCoordinate(coordinate);
+
+    // Popup positionieren
+    const popup = document.getElementById('popup-form');
+    popup.style.left = pixel[0] + 'px';
+    popup.style.top = pixel[1] + 'px';
+    popup.style.display = 'block';
+
+    // Felder leeren
+    document.getElementById('popup-description').value = '';
+    document.getElementById('popup-username').value = '';
+
+    // Buttons
+    const saveBtn = document.getElementById('popup-save');
+    const cancelBtn = document.getElementById('popup-cancel');
+
+    // Nur einmal speichern: vorherige Listener entfernen
+    saveBtn.onclick = () => {
+      const desc = document.getElementById('popup-description').value;
+      const user = document.getElementById('popup-username').value;
+
+      feature.set('description', desc);
+      feature.set('username', user);
+
+      transactWFS('insert', feature);
+
+      popup.style.display = 'none';
+      map.removeInteraction(drawInteraction); // Zeichnen beenden
+      setActiveButton(null);
+    };
+
+    cancelBtn.onclick = () => {
+      popup.style.display = 'none';
+      vectorSource3.removeFeature(feature); // Rückgängig machen
+      map.removeInteraction(drawInteraction);
+      setActiveButton(null);
+    };
+  });
+});
+
+// ----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+// Delete-Button
+document.getElementById('delete').addEventListener('click', () => {
+  setActiveButton('delete');
+  removeInteractions();
+  map.addInteraction(snap);
+  map.addInteraction(selectInteraction);
+
+  const selectedFeatures = selectInteraction.getFeatures();
+
+  selectedFeatures.once('add', function (e) {
+    const feature = e.element;
+    const fid = feature.getId();
+
+    if (!fid) {
+      alert("Dieses Feature hat keine ID und kann nicht gelöscht werden.");
+      console.warn("Feature ohne ID:", feature);
+      return;
+    }
+
+if (confirm("Möchten Sie diesen Punkt wirklich unwiderruflich löschen?")) {
+  const id = feature.getId();
+
+  if (!id) {
+    alert("Fehler: Feature hat keine gültige ID.");
+    console.error("Feature ohne ID:", feature);
+    return;
+  }
+
+  transactWFS('delete', feature);
+  vectorLayer3.getSource().removeFeature(feature); // lokal entfernen
+}
+    selectedFeatures.clear();
+    map.removeInteraction(selectInteraction);
+    map.removeInteraction(snap);
+    vectorSource3.clear();
+    vectorSource3.refresh();
+    setActiveButton(null);
+  });
+});
+
+// ----------------------------------------------------------------------------
+// Hilfsfunktion – z. B. für Formulare
+function DelselectElement(id, valueToSelect) {
+  const element = document.getElementById(id);
+  element.value = valueToSelect;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+  
+                    
+map.addLayer(vectorLayer);
+map.addLayer(vectorLayer2);
+
+
+
+
+
+
+const tooltip = document.getElementById('tooltip');
+const overlay = new ol.Overlay({
+  element: tooltip,
+  offset: [10, 0],
+  positioning: 'center-left'
+});
+map.addOverlay(overlay);    
+
+map.on('pointermove', function (evt) {
+  let info = '';
+  let found = false;
+
+  map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+    if (!feature) return;
+
+    const properties = feature.getProperties();
+
+    if (layer === vectorLayer3) {
+      // Nur bestimmte Felder anzeigen mit Labels
+      const labels = {
+        fid: 'ID',
+        description: 'Beschreibung',
+        username: 'Bearbeiter',
+        created_on: 'Erstellt am'
+      };
+
+      for (const key in labels) {
+        if (properties[key] !== undefined) {
+          info += `<b>${labels[key]}</b>: ${properties[key]}<br>`;
+        }
+      }
+    } else {
+      // Alle Properties außer Geometrie
+      for (const key in properties) {
+        if (key !== 'geometry') {
+          info += `<b>${key}</b>: ${properties[key]}<br>`;
+        }
+      }
+    }
+
+    found = true;
+    return true; // Nur erstes Feature anzeigen
+  });
+
+  if (found) {
+    tooltip.innerHTML = info;
+    tooltip.style.display = 'block';
+    overlay.setPosition(evt.coordinate);
+    map.getTargetElement().style.cursor = 'pointer';
+  } else {
+    tooltip.style.display = 'none';
+    map.getTargetElement().style.cursor = '';
+  }
+});
+
+
+
+
+
+
+
+const toggleBtn = document.getElementById('toggleLayer');
+
+let versickerungAktiv = false;
+
+toggleBtn.addEventListener('click', () => {
+  versickerungAktiv = !versickerungAktiv;
+
+  wmtsLayer.setVisible(!versickerungAktiv);
+  wmtsLayerMitVersickerung.setVisible(versickerungAktiv);
+
+  toggleBtn.textContent = versickerungAktiv
+    ? 'Mit Versickerung: Ein'
+    : 'Mit Versickerung: Aus';
+
+  // Klasse wechseln
+  if (versickerungAktiv) {
+    toggleBtn.classList.remove('red');
+    toggleBtn.classList.add('green');
+  } else {
+    toggleBtn.classList.remove('green');
+    toggleBtn.classList.add('red');
+  }
+
+  // aktuelle Opacity auch auf den neuen aktiven Layer anwenden
+  const opacity = parseFloat(opacitySlider.value);
+  getActiveWMTSLayer().setOpacity(opacity);
+});
+
+// Initialer Zustand
+toggleBtn.classList.add('red');
+
+
+
+
+
+
+
+
+const opacitySlider = document.getElementById('opacitySlider');
+const opacityValue = document.getElementById('opacityValue');
+
+// Hilfsfunktion: aktiven Layer finden
+function getActiveWMTSLayer() {
+  return wmtsLayer.getVisible() ? wmtsLayer : wmtsLayerMitVersickerung;
+}
+
+// Initialwert setzen
+getActiveWMTSLayer().setOpacity(parseFloat(opacitySlider.value));
+
+opacitySlider.addEventListener('input', () => {
+  const opacity = parseFloat(opacitySlider.value);
+  const activeLayer = getActiveWMTSLayer();
+  activeLayer.setOpacity(opacity);
+  opacityValue.textContent = Math.round(opacity * 100) + '%';
+});
+
+const initialOpacity = parseFloat(opacitySlider.value);
+getActiveWMTSLayer().setOpacity(initialOpacity);
+opacityValue.textContent = Math.round(initialOpacity * 100) + '%';   
+      
+    </script>
+  </body>
+</html>
