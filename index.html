@@ -542,9 +542,7 @@ const DVG = new ol.layer.Vector({
   })
 });
 
-wfsSource.on('featuresloadend', () => {
-  map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
-});
+
 
 
 
@@ -766,7 +764,7 @@ function DelselectElement(id, valueToSelect) {
 map.addLayer(vectorLayer);
 map.addLayer(vectorLayer2);
 map.addLayer(vectorLayer2_1);
-      map.addLayer(DVG);
+map.addLayer(DVG);
 
 
 
