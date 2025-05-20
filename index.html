@@ -510,7 +510,26 @@ const vectorLayer = new ol.layer.Vector({
               })
      });
 ///////////////////////////////////////////////////////////////////////////////
-    
+const DVG = new ol.layer.Vector({
+    source: wfsSource,
+    style: function(feature) {
+        if (feature.get('GN') !== 'Mettmann') {  // "Mettmann" herausfiltern
+            return new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 255, 0.5)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#ffffff',
+                    width: 2
+                })
+            });
+        }
+        return null; // Blendet Mettmann einfach aus
+    }
+});
+map.addLayer(DVG);
+///////////////////////////////////////////////////////////////////////////////
+      
 const wfsURL = 'https://maps.kommunalagentur.nrw/geoserver/StarkregenRheinbach/ows';
 
 // Quelle für GeoJSON-Features (WFS)
