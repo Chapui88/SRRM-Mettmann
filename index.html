@@ -519,40 +519,31 @@ const vectorLayer = new ol.layer.Vector({
      });
 ///////////////////////////////////////////////////////////////////////////////
 const wfsSource = new ol.source.Vector({
-  format: new ol.format.WFS({
-    gmlFormat: new ol.format.GML32()
-  }),
-  url: function (extent) {
-    return (
-      'https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?' +
-      'service=WFS&' +
-      'version=2.0.0&' +
-      'request=GetFeature&' +
-      'typename=dvg:nw_dvg1_krs&' +  // Wichtig: Namespace dvg verwenden
-      'srsname=EPSG:25832&' +
-      'bbox=' + extent.join(',') + ',EPSG:25832'
-    );
-  },
-  strategy: ol.loadingstrategy.bbox
+  format: new ol.format.WFS(),
+  url: "https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?" +
+       "service=WFS&" +
+       "version=1.1.0&" +
+       "request=GetFeature&" +
+       "typename=nw_dvg1_krs&" +
+       "srsname=EPSG:25832",
+  strategy: ol.loadingstrategy.all
 });
 
 const DVG = new ol.layer.Vector({
   source: wfsSource,
   style: new ol.style.Style({
     fill: new ol.style.Fill({
-      color: 'rgba(255, 255, 255, 0.4)'
+      color: 'rgba(173, 216, 230, 0.5)' // hellblau, 50% transparent
     }),
     stroke: new ol.style.Stroke({
-      color: '#000',
+      color: '#000000',
       width: 1
     })
   })
 });
 
-wfsSource.once('change', function () {
-  if (wfsSource.getState() === 'ready') {
-    map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
-  }
+wfsSource.on('featuresloadend', () => {
+  map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
 });
 
 map.addLayer(DVG);
