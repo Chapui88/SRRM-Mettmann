@@ -520,7 +520,7 @@ const vectorLayer = new ol.layer.Vector({
 ///////////////////////////////////////////////////////////////////////////////
 const wfsSource = new ol.source.Vector({
   format: new ol.format.WFS({
-    gmlFormat: new ol.format.GML32(),  // Achtung: GML32, nicht GML3
+    gmlFormat: new ol.format.GML32()
   }),
   url: function (extent) {
     return (
@@ -528,7 +528,7 @@ const wfsSource = new ol.source.Vector({
       'service=WFS&' +
       'version=2.0.0&' +
       'request=GetFeature&' +
-      'typename=dvg:nw_dvg1_krs&' +
+      'typename=dvg:nw_dvg1_krs&' +  // Wichtig: Namespace dvg verwenden
       'srsname=EPSG:25832&' +
       'bbox=' + extent.join(',') + ',EPSG:25832'
     );
@@ -538,17 +538,21 @@ const wfsSource = new ol.source.Vector({
 
 const DVG = new ol.layer.Vector({
   source: wfsSource,
-  style:       new ol.style.Style({
-        fill: new ol.style.Fill({
-          color: 'rgba(0, 128, 255, 0.2)',
-        }),
-        stroke: new ol.style.Stroke({
-          color: '#0078D7',
-          width: 1,
-        })
-      });
+  style: new ol.style.Style({
+    fill: new ol.style.Fill({
+      color: 'rgba(255, 255, 255, 0.4)'
+    }),
+    stroke: new ol.style.Stroke({
+      color: '#000',
+      width: 1
+    })
+  })
+});
 
-  
+wfsSource.once('change', function () {
+  if (wfsSource.getState() === 'ready') {
+    map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
+  }
 });
 
 map.addLayer(DVG);
