@@ -338,8 +338,7 @@ const wmtsLayer = new ol.layer.Tile({
   visible: true
 });
 
-// map ist deine bereits existierende OpenLayers Map-Instanz
-map.addLayer(wmtsLayer);
+
 
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   opacity: 0.8,
@@ -385,9 +384,7 @@ const view = new ol.View({
         view: view
       });
       
-      
-      
- 
+    
 
       const searchBtn = document.getElementById('searchBtn');
       const addressInput = document.getElementById('addressInput');
