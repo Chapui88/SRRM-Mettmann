@@ -538,10 +538,7 @@ const wfsSource = new ol.source.Vector({
 
 const DVG = new ol.layer.Vector({
   source: wfsSource,
-  style: function (feature) {
-    const name = feature.get('GN'); // Attributname prüfen!
-    if (name !== 'Mettmann') {
-      return new ol.style.Style({
+  style:       new ol.style.Style({
         fill: new ol.style.Fill({
           color: 'rgba(0, 128, 255, 0.2)',
         }),
@@ -550,9 +547,8 @@ const DVG = new ol.layer.Vector({
           width: 1,
         })
       });
-    }
-    return null;
-  }
+
+  
 });
 
 map.addLayer(DVG);
