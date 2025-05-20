@@ -311,39 +311,44 @@ const wmtsLayer2 = new ol.layer.Tile({
 
   const capabilitiesUrl_2 = 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/1.0.0/WMTSCapabilities.xml';
 
-  const parser_2 = new ol.format.WMTSCapabilities();
+const parser_2 = new ol.format.WMTSCapabilities();
 
-  fetch(capabilitiesUrl_2)
-    .then(response => response.text())
-    .then(text_2 => {
-      const result_2 = parser_2.read(text_2);
+fetch(capabilitiesUrl_2)
+  .then(response => response.text())
+  .then(text_2 => {
+    const result_2 = parser_2.read(text_2);
 
-      const layer_2 = result_2.Contents.Layer[0];
-      const matrixSet_2 = result_2.Contents.TileMatrixSet[0];
+    const layer_2 = result_2.Contents.Layer[0];
+    const matrixSet_2 = result_2.Contents.TileMatrixSet[0];
 
-      const projection_2 = ol.proj.get(matrixSet_2.SupportedCRS);
+    const projection_2 = ol.proj.get(matrixSet_2.SupportedCRS);
 
-      const tileGrid_2 = new ol.tilegrid.WMTS({
-        origin: matrixSet_2.TileMatrix[0].TopLeftCorner,
-        resolutions: matrixSet_2.TileMatrix.map(m_2 => m_2.ScaleDenominator * 0.00028),
-        matrixIds: matrixSet_2.TileMatrix.map(m_2 => m_2.Identifier),
-        tileSize: 256
-      });
+    const tileGrid_2 = new ol.tilegrid.WMTS({
+      origin: matrixSet_2.TileMatrix[0].TopLeftCorner,
+      resolutions: matrixSet_2.TileMatrix.map(m_2 => m_2.ScaleDenominator * 0.00028),
+      matrixIds: matrixSet_2.TileMatrix.map(m_2 => m_2.Identifier),
+      tileSize: 256
+    });
 
-      const wmtsSource_2 = new ol.source.WMTS({
-        url: result_2.Capability.Request.GetTile.DCP.HTTP.Get[0].href,
-        layer: layer_2.Identifier,
-        matrixSet: matrixSet_2.Identifier,
-        format: layer_2.Format[0],
-        projection: projection_2,
-        tileGrid: tileGrid_2,
-        style: layer_2.Style[0].Identifier,
-        requestEncoding: 'REST'
-      });
+    const wmtsSource_2 = new ol.source.WMTS({
+      url: result_2.Capability.Request.GetTile.DCP.HTTP.Get[0].href,
+      layer: layer_2.Identifier,
+      matrixSet: matrixSet_2.Identifier,
+      format: 'image/png',
+      projection: projection_2,
+      tileGrid: tileGrid_2,
+      style: layer_2.Style[0].Identifier,
+      requestEncoding: 'REST'
+    });
 
-      const wmtsLayer = new ol.layer.Tile({
-        source: wmtsSource_2
-      });
+    const wmtsLayer_2 = new ol.layer.Tile({
+      source: wmtsSource_2,
+      opacity: 0.8
+    });
+
+    // Hier kannst du wmtsLayer_2 deiner bestehenden Map hinzufügen,
+    // z.B. map.addLayer(wmtsLayer_2);
+  });
 
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   opacity: 0.8,
