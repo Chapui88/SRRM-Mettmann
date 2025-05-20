@@ -546,7 +546,7 @@ wfsSource.on('featuresloadend', () => {
   map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
 });
 
-map.addLayer(DVG);
+
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -766,6 +766,7 @@ function DelselectElement(id, valueToSelect) {
 map.addLayer(vectorLayer);
 map.addLayer(vectorLayer2);
 map.addLayer(vectorLayer2_1);
+      map.addLayer(DVG);
 
 
 
