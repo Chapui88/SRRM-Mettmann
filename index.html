@@ -309,47 +309,37 @@ const wmtsLayer2 = new ol.layer.Tile({
   }),
 });
 
-  const capabilitiesUrl_2 = 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/1.0.0/WMTSCapabilities.xml';
+const projection_2 = ol.proj.get('EPSG:3857');
+const projectionExtent_2 = projection_2.getExtent();
+const size_2 = ol.extent.getWidth(projectionExtent_2) / 256;
 
-const parser_2 = new ol.format.WMTSCapabilities();
-let wmtsLayer;
-      
-fetch(capabilitiesUrl_2)
-  .then(response => response.text())
-  .then(text_2 => {
-    const result_2 = parser_2.read(text_2);
+const resolutions_2 = Array.from({length: 19}, (_, z) => size_2 / Math.pow(2, z));
+const matrixIds_2 = Array.from({length: 19}, (_, z) => z.toString());
 
-    const layer_2 = result_2.Contents.Layer[0];
-    const matrixSet_2 = result_2.Contents.TileMatrixSet[0];
+const tileGrid_2 = new ol.tilegrid.WMTS({
+  origin: ol.extent.getTopLeft(projectionExtent_2),
+  resolutions: resolutions_2,
+  matrixIds: matrixIds_2,
+  tileSize: 256
+});
 
-    const projection_2 = ol.proj.get(matrixSet_2.SupportedCRS);
+const wmtsLayer = new ol.layer.Tile({
+  source: new ol.source.WMTS({
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/{TileMatrix}/{TileCol}/{TileRow}.png',
+    layer: 'MaxUT_oV_NO_Test',
+    matrixSet: 'GoogleMapsCompatible', // oder der richtige MatrixSet-Name, den du kennst
+    format: 'image/png',
+    projection: projection_2,
+    tileGrid: tileGrid_2,
+    style: 'default',
+    requestEncoding: 'REST'
+  }),
+  opacity: 0.8,
+  visible: true
+});
 
-    const tileGrid_2 = new ol.tilegrid.WMTS({
-      origin: matrixSet_2.TileMatrix[0].TopLeftCorner,
-      resolutions: matrixSet_2.TileMatrix.map(m_2 => m_2.ScaleDenominator * 0.00028),
-      matrixIds: matrixSet_2.TileMatrix.map(m_2 => m_2.Identifier),
-      tileSize: 256
-    });
-
-    const wmtsSource_2 = new ol.source.WMTS({
-      url: result_2.Capability.Request.GetTile.DCP.HTTP.Get[0].href,
-      layer: layer_2.Identifier,
-      matrixSet: matrixSet_2.Identifier,
-      format: 'image/png',
-      projection: projection_2,
-      tileGrid: tileGrid_2,
-      style: layer_2.Style[0].Identifier,
-      requestEncoding: 'REST'
-    });
-
-    const wmtsLayer = new ol.layer.Tile({
-      source: wmtsSource_2,
-      opacity: 0.8
-    });
-
-    // Hier kannst du wmtsLayer_2 deiner bestehenden Map hinzufügen,
-    // z.B. map.addLayer(wmtsLayer_2);
-  });
+// map ist deine bereits existierende OpenLayers Map-Instanz
+map.addLayer(wmtsLayer);
 
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   opacity: 0.8,
