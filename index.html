@@ -310,53 +310,43 @@ const wmtsLayer2 = new ol.layer.Tile({
 });
 
 const projection_2 = ol.proj.get('EPSG:3857');
-const projectionExtent_2 = projection_2.getExtent();
-const size_2 = ol.extent.getWidth(projectionExtent_2) / 256;
+const topLeftCorner_2 = [-20037508.342787, 20037508.342787];
 
-const resolutions_2 = Array.from({length: 19}, (_, z) => size_2 / Math.pow(2, z));
-const matrixIds_2 = Array.from({length: 19}, (_, z) => z.toString());
+// Zoomstufen 14 bis 20 laut Capabilities
+const matrixIds_2 = ['14', '15', '16', '17', '18', '19', '20'];
+const scaleDenominators_2 = [
+  34123.673336176726,
+  17061.836668560845,
+  8530.918334280406,
+  4265.459166667739,
+  2132.7295838063405,
+  1066.3647914307007,
+  533.1823957153497
+];
 
+// OGC: 0.28mm per Pixel → 0.00028 Meter/Pixel
+// Resolution = ScaleDenominator * 0.00028
+const resolutions_2 = scaleDenominators_2.map(sd => sd * 0.00028);
+
+// TileGrid erzeugen
 const tileGrid_2 = new ol.tilegrid.WMTS({
-  origin: ol.extent.getTopLeft(projectionExtent_2),
+  origin: topLeftCorner_2,
   resolutions: resolutions_2,
   matrixIds: matrixIds_2,
   tileSize: 256
 });
 
+// WMTS-Layer definieren
 const wmtsLayer = new ol.layer.Tile({
   source: new ol.source.WMTS({
-    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/{TileMatrix}/{TileCol}/{TileRow}.png',
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/tile/1.0.0/MaxUT_oV_NO_Test/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
     layer: 'MaxUT_oV_NO_Test',
-    matrixSet: 'GoogleMapsCompatible', // oder der richtige MatrixSet-Name, den du kennst
-    format: 'image/png',
+    matrixSet: 'default028mm',
+    format: 'image/png', // oder 'image/jpgpng' ausprobieren
     projection: projection_2,
     tileGrid: tileGrid_2,
     style: 'default',
     requestEncoding: 'REST'
-  }),
-  opacity: 0.8,
-  visible: true
-});
-
-
-
-const wmtsLayerMitVersickerung = new ol.layer.Tile({
-  opacity: 0.8,
-  visible: false, // Anfangs ausgeblendet
-  source: new ol.source.WMTS({
-    url: `https://api.maptiler.com/tiles/0196e915-baef-7ed1-ab53-1026bd845c97/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
-    layer: 'tiles/0196e915-baef-7ed1-ab53-1026bd845c97',
-    matrixSet: 'GoogleMapsCompatible256-z10-14',
-    format: 'image/webp',
-    style: 'default',
-    wrapX: true,
-    requestEncoding: 'REST',
-    tileGrid: new ol.tilegrid.WMTS({
-      origin: ol.extent.getTopLeft(projection.getExtent()),
-      resolutions: resolutions,
-      matrixIds: matrixIds,
-      tileSize: 256
-    })
   })
 });
 
