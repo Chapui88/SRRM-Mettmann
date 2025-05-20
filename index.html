@@ -520,28 +520,34 @@ const vectorLayer = new ol.layer.Vector({
 ///////////////////////////////////////////////////////////////////////////////
 const wfsSource = new ol.source.Vector({
   format: new ol.format.WFS({
-    gmlFormat: new ol.format.GML3()
+    gmlFormat: new ol.format.GML32(),  // Achtung: GML32, nicht GML3
   }),
-  url: "https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?" +
-       "service=WFS&" +
-       "version=1.1.0&" +
-       "request=GetFeature&" +
-       "typename=nw_dvg1_krs&" +
-       "srsname=EPSG:25832",
-  strategy: ol.loadingstrategy.all
+  url: function (extent) {
+    return (
+      'https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?' +
+      'service=WFS&' +
+      'version=2.0.0&' +
+      'request=GetFeature&' +
+      'typename=dvg:nw_dvg1_krs&' +
+      'srsname=EPSG:25832&' +
+      'bbox=' + extent.join(',') + ',EPSG:25832'
+    );
+  },
+  strategy: ol.loadingstrategy.bbox
 });
 
 const DVG = new ol.layer.Vector({
   source: wfsSource,
-  style: function(feature) {
-    if (feature.get('GN') !== 'Mettmann') {
+  style: function (feature) {
+    const name = feature.get('GN'); // Attributname prüfen!
+    if (name !== 'Mettmann') {
       return new ol.style.Style({
         fill: new ol.style.Fill({
-          color: 'rgba(0, 128, 255)'
+          color: 'rgba(0, 128, 255, 0.2)',
         }),
         stroke: new ol.style.Stroke({
           color: '#0078D7',
-          width: 2
+          width: 1,
         })
       });
     }
@@ -549,13 +555,8 @@ const DVG = new ol.layer.Vector({
   }
 });
 
-wfsSource.once('change', function () {
-  if (wfsSource.getState() === 'ready') {
-    map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
-  }
-});
-
 map.addLayer(DVG);
+
 
 ///////////////////////////////////////////////////////////////////////////////
       
