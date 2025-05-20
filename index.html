@@ -357,7 +357,7 @@ const wmtsLayer = new ol.layer.Tile({
   })
 });
 
-    wmtsLayer_2.getSource().on('tileloaderror', function (event) {
+    wmtsLayer.getSource().on('tileloaderror', function (event) {
   const tileCoord = event.tile.getTileCoord();
   console.warn('Tile load error at', tileCoord);
 });
