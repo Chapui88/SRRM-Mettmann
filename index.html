@@ -357,6 +357,12 @@ const wmtsLayer = new ol.layer.Tile({
   })
 });
 
+    wmtsLayer_2.getSource().on('tileloaderror', function (event) {
+  const tileCoord = event.tile.getTileCoord();
+  console.warn('Tile load error at', tileCoord);
+});
+
+
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   opacity: 0.8,
   visible: false, // Anfangs ausgeblendet
@@ -376,6 +382,8 @@ const wmtsLayerMitVersickerung = new ol.layer.Tile({
     })
   })
 });
+
+      
 
 const view = new ol.View({
   center: ol.proj.fromLonLat([6.96583, 51.22848]), // z. B. Düsseldorf
