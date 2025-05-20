@@ -311,6 +311,7 @@ const wmtsLayer2 = new ol.layer.Tile({
 
 // Neue Variablen mit "_2"
 const projection_2 = getProjection('EPSG:3857');
+    
 const size_2 = getWidth(projection_2.getExtent()) / 256;
 const resolutions_2 = Array.from({length: 19}, (_, z) => size_2 / Math.pow(2, z));
 const matrixIds_2 = Array.from({length: 19}, (_, z) => z.toString());
