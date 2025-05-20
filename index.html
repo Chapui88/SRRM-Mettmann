@@ -519,21 +519,32 @@ const vectorLayer = new ol.layer.Vector({
      });
 ///////////////////////////////////////////////////////////////////////////////
 const wfsSource = new ol.source.Vector({
-  format: new ol.format.WFS(),
-  url: "https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?" +
-       "service=WFS&" +
-       "version=1.1.0&" +
-       "request=GetFeature&" +
-       "typename=nw_dvg1_krs&" +
-       "srsname=EPSG:25832",
-  strategy: ol.loadingstrategy.all
+  format: new ol.format.GML32(),  // GML-Format, weil WFS liefert GML
+  loader: function(extent, resolution, projection) {
+    const url = 'https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?' +
+      'service=WFS&version=1.1.0&request=GetFeature&' +
+      'typename=nw_dvg1_krs&' +
+      'srsname=EPSG:25832&' +
+      'bbox=' + extent.join(',') + ',EPSG:25832';
+
+    fetch(url)
+      .then(response => response.text())
+      .then((gmlText) => {
+        const features = wfsSource.getFormat().readFeatures(gmlText, {
+          dataProjection: 'EPSG:25832',
+          featureProjection: projection  // z.B. EPSG:3857 (deine Map-Projektion)
+        });
+        wfsSource.addFeatures(features);
+      });
+  },
+  strategy: ol.loadingstrategy.bbox
 });
 
 const DVG = new ol.layer.Vector({
   source: wfsSource,
   style: new ol.style.Style({
     fill: new ol.style.Fill({
-      color: 'rgba(173, 216, 230, 0.5)' // hellblau, 50% transparent
+      color: 'rgba(173, 216, 230, 0.5)'  // hellblau, halbtransparent
     }),
     stroke: new ol.style.Stroke({
       color: '#000000',
@@ -541,6 +552,7 @@ const DVG = new ol.layer.Vector({
     })
   })
 });
+
 
 
 
