@@ -312,7 +312,8 @@ const wmtsLayer2 = new ol.layer.Tile({
   const capabilitiesUrl_2 = 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/1.0.0/WMTSCapabilities.xml';
 
 const parser_2 = new ol.format.WMTSCapabilities();
-
+let wmtsLayer;
+      
 fetch(capabilitiesUrl_2)
   .then(response => response.text())
   .then(text_2 => {
