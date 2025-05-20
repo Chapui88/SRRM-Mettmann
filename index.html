@@ -318,7 +318,7 @@ const matrixIds_2 = Array.from({length: 19}, (_, z) => z.toString());
 
 // TileGrid für den zweiten Layer
 const tileGrid_2 = new ol.tilegrid.WMTS({
-  origin: ol.extent.getTopLeft(projection.getExtent()),,
+  origin: ol.extent.getTopLeft(projection.getExtent()),
   resolutions: resolutions_2,
   matrixIds: matrixIds_2,
 });
