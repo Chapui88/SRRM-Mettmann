@@ -350,7 +350,25 @@ const wmtsLayer = new ol.layer.Tile({
   })
 });
 
-
+const wmtsLayerMitVersickerung = new ol.layer.Tile({
+  opacity: 0.8,
+  visible: false, // Anfangs ausgeblendet
+  source: new ol.source.WMTS({
+    url: `https://api.maptiler.com/tiles/0196e915-baef-7ed1-ab53-1026bd845c97/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
+    layer: 'tiles/0196e915-baef-7ed1-ab53-1026bd845c97',
+    matrixSet: 'GoogleMapsCompatible256-z10-14',
+    format: 'image/webp',
+    style: 'default',
+    wrapX: true,
+    requestEncoding: 'REST',
+    tileGrid: new ol.tilegrid.WMTS({
+      origin: ol.extent.getTopLeft(projection.getExtent()),
+      resolutions: resolutions,
+      matrixIds: matrixIds,
+      tileSize: 256
+    })
+  })
+});
 
 const view = new ol.View({
   center: ol.proj.fromLonLat([6.96583, 51.22848]), // z. B. Düsseldorf
