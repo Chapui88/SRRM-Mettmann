@@ -519,35 +519,44 @@ const vectorLayer = new ol.layer.Vector({
      });
 ///////////////////////////////////////////////////////////////////////////////
 const wfsSource = new ol.source.Vector({
-    format: new ol.format.WFS(),
-    url: "https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?" +
-         "service=WFS&" +
-         "version=1.1.0&" +
-         "request=GetFeature&" +
-         "typename=nw_dvg1_krs&" +
-         "srsname=EPSG:25832",
-    strategy: ol.loadingstrategy.all
+  format: new ol.format.WFS({
+    gmlFormat: new ol.format.GML3()
+  }),
+  url: "https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?" +
+       "service=WFS&" +
+       "version=1.1.0&" +
+       "request=GetFeature&" +
+       "typename=nw_dvg1_krs&" +
+       "srsname=EPSG:25832",
+  strategy: ol.loadingstrategy.all
 });
-      
-      
+
 const DVG = new ol.layer.Vector({
-    source: wfsSource,
-    style: function(feature) {
-        if (feature.get('GN') !== 'Mettmann') {  // "Mettmann" herausfiltern
-            return new ol.style.Style({
-                fill: new ol.style.Fill({
-                    color: 'rgba(255, 255, 255, 0.5)'
-                }),
-                stroke: new ol.style.Stroke({
-                    color: '#ffffff',
-                    width: 2
-                })
-            });
-        }
-        return null; // Blendet Mettmann einfach aus
+  source: wfsSource,
+  style: function(feature) {
+    if (feature.get('GN') !== 'Mettmann') {
+      return new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(0, 128, 255, 0.3)'
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#0078D7',
+          width: 2
+        })
+      });
     }
+    return null;
+  }
 });
+
+wfsSource.once('change', function () {
+  if (wfsSource.getState() === 'ready') {
+    map.getView().fit(wfsSource.getExtent(), { duration: 1000 });
+  }
+});
+
 map.addLayer(DVG);
+
 ///////////////////////////////////////////////////////////////////////////////
       
 const wfsURL = 'https://maps.kommunalagentur.nrw/geoserver/StarkregenRheinbach/ows';
