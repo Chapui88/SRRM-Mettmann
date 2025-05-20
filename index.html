@@ -290,7 +290,7 @@ const resolutions = matrixIds.map(z => {
   return (156543.03392804097 / Math.pow(2, z)); // Standard WebMercator Auflösung pro Zoomstufe
 });
 
-const wmtsLayer = new ol.layer.Tile({
+const wmtsLayer2 = new ol.layer.Tile({
    opacity: 0.8, // 50% transparent
   source: new ol.source.WMTS({
     url: `https://api.maptiler.com/tiles/0196e918-3756-7629-a252-84dc2cf0f059/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
@@ -308,6 +308,34 @@ const wmtsLayer = new ol.layer.Tile({
     })
   }),
 });
+
+// Neue Variablen mit "_2"
+const projection_2 = getProjection('EPSG:3857');
+const size_2 = getWidth(projection_2.getExtent()) / 256;
+const resolutions_2 = Array.from({length: 19}, (_, z) => size_2 / Math.pow(2, z));
+const matrixIds_2 = Array.from({length: 19}, (_, z) => z.toString());
+
+// TileGrid für den zweiten Layer
+const tileGrid_2 = new WMTSTileGrid({
+  origin: [-20037508.342789244, 20037508.342789244],
+  resolutions: resolutions_2,
+  matrixIds: matrixIds_2,
+});
+
+// Der WMTS-Layer mit den "_2"-Werten
+const wmtsLayer = new TileLayer({
+  source: new WMTS({
+    url: 'https://api.maptiler.com/tiles/0196e8b0-616a-7c25-9c2a-74ea439b5f93/{TileMatrix}/{TileCol}/{TileRow}.webp?key=EdafZNDsmwFgAOzJWLIw',
+    layer: 'tiles/0196e8b0-616a-7c25-9c2a-74ea439b5f93',
+    matrixSet: 'GoogleMapsCompatible256-z10-28',
+    format: 'image/webp',
+    projection: projection_2,
+    tileGrid: tileGrid_2,
+    style: 'default',
+    requestEncoding: 'REST',
+  }),
+});
+
 
 
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
