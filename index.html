@@ -510,6 +510,18 @@ const vectorLayer = new ol.layer.Vector({
               })
      });
 ///////////////////////////////////////////////////////////////////////////////
+const wfsSource = new ol.source.Vector({
+    format: new ol.format.WFS(),
+    url: "https://www.wfs.nrw.de/geobasis/wfs_nw_dvg?" +
+         "service=WFS&" +
+         "version=1.1.0&" +
+         "request=GetFeature&" +
+         "typename=nw_dvg1_krs&" +
+         "srsname=EPSG:25832",
+    strategy: ol.loadingstrategy.all
+});
+      
+      
 const DVG = new ol.layer.Vector({
     source: wfsSource,
     style: function(feature) {
