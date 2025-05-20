@@ -325,7 +325,7 @@ const tileGrid_2 = new ol.tilegrid.WMTS({
 
 // Der WMTS-Layer mit den "_2"-Werten
 const wmtsLayer = new ol.layer.Tile({
-  source: ew ol.source.WMTS({
+  source: new ol.source.WMTS({
     url: 'https://api.maptiler.com/tiles/0196e8b0-616a-7c25-9c2a-74ea439b5f93/{TileMatrix}/{TileCol}/{TileRow}.webp?key=EdafZNDsmwFgAOzJWLIw',
     layer: 'tiles/0196e8b0-616a-7c25-9c2a-74ea439b5f93',
     matrixSet: 'GoogleMapsCompatible256-z10-28',
