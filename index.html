@@ -317,14 +317,14 @@ const resolutions_2 = Array.from({length: 19}, (_, z) => size_2 / Math.pow(2, z)
 const matrixIds_2 = Array.from({length: 19}, (_, z) => z.toString());
 
 // TileGrid für den zweiten Layer
-const tileGrid_2 = new WMTSTileGrid({
+const tileGrid_2 = new ol.tilegrid.WMTS({
   origin: [-20037508.342789244, 20037508.342789244],
   resolutions: resolutions_2,
   matrixIds: matrixIds_2,
 });
 
 // Der WMTS-Layer mit den "_2"-Werten
-const wmtsLayer = new TileLayer({
+const wmtsLayer = new ol.layer.Tile({
   source: new WMTS({
     url: 'https://api.maptiler.com/tiles/0196e8b0-616a-7c25-9c2a-74ea439b5f93/{TileMatrix}/{TileCol}/{TileRow}.webp?key=EdafZNDsmwFgAOzJWLIw',
     layer: 'tiles/0196e8b0-616a-7c25-9c2a-74ea439b5f93',
