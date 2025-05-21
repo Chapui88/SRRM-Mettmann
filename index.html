@@ -329,8 +329,9 @@ const projection_3 = ol.proj.get('EPSG:3857');
 const topLeftCorner_3 = [-20037508.342787, 20037508.342787];
 
 // Zoomstufen 14 bis 19 laut Capabilities
-const matrixIds_3 = ['14', '15', '16', '17', '18', '19'];
+const matrixIds_3 = ['13', '14', '15', '16', '17', '18', '19'];
 const scaleDenominators_3 = [
+  68247.34667235345,
   34123.673336176726,
   17061.836668560845,
   8530.918334280406,
@@ -353,10 +354,10 @@ const tileGrid_3 = new ol.tilegrid.WMTS({
 // WMTS-Layer definieren
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   source: new ol.source.WMTS({
-    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV/MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV1/MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV1/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
     layer: 'MaxUT_KME_mV1',
     matrixSet: 'default028mm',
-    format: 'image/jpgpng', // ggf. auch 'image/jpgpng' testen
+    format: 'image/jpgpng',
     projection: projection_3,
     tileGrid: tileGrid_3,
     style: 'default',
