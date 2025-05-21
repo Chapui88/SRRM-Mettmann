@@ -276,16 +276,16 @@ html, body, #map {
 const topLeftCorner_2 = [-20037508.342787, 20037508.342787];
 
 // Zoomstufen 14 bis 20 laut Capabilities
-const matrixIds_2 = ['14', '15', '16', '17', '18', '19', '20'];
+const matrixIds_2 = ['13', '14', '15', '16', '17', '18', '19'];
 const scaleDenominators_2 = [
-  34123.673336176726,
-  17061.836668560845,
-  8530.918334280406,
-  4265.459166667739,
-  2132.7295838063405,
-  1066.3647914307007,
-  533.1823957153497
-];
+        4891.96981025128,  // Zoom-Level 13
+        2445.98490512564,  // Zoom-Level 14
+        1222.99245256282,  // Zoom-Level 15
+        611.49622628141,   // Zoom-Level 16
+        305.748113140705,  // Zoom-Level 17
+        152.8740565703525, // Zoom-Level 18
+        76.43702828517625  // Zoom-Level 19
+      ],
 
 // OGC: 0.28mm per Pixel → 0.00028 Meter/Pixel
 // Resolution = ScaleDenominator * 0.00028
@@ -302,8 +302,8 @@ const tileGrid_2 = new ol.tilegrid.WMTS({
 // WMTS-Layer definieren
 const wmtsLayer = new ol.layer.Tile({
   source: new ol.source.WMTS({
-    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_oV/MapServer/WMTS/tile/1.0.0/MaxUT_oV_NO_Test/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
-    layer: 'MaxUT_oV_NO_Test',
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_oV/MapServer/WMTS/tile/1.0.0/MaxUT_KME_oV/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
+    layer: 'MaxUT_KME_oV',
     matrixSet: 'default028mm',
     format: 'image/jpgpng', // oder 'image/jpgpng' ausprobieren
     projection: projection_2,
@@ -321,8 +321,8 @@ const wmtsLayer = new ol.layer.Tile({
 
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   source: new ol.source.WMTS({
-    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_oV/MapServer/WMTS/tile/1.0.0/MaxUT_oV_NO_Test/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
-    layer: 'MaxUT_oV_NO_Test',
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV//MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV//default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
+    layer: 'MaxUT_KME_mV/',
     matrixSet: 'default028mm',
     format: 'image/jpgpng', // oder 'image/jpgpng' ausprobieren
     projection: projection_2,
