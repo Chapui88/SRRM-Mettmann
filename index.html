@@ -354,7 +354,7 @@ const tileGrid_3 = new ol.tilegrid.WMTS({
 const wmtsLayerMitVersickerung = new ol.layer.Tile({
   source: new ol.source.WMTS({
     url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV/MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
-    layer: 'MaxUT_KME_mV',
+    layer: 'MaxUT_KME_mV1',
     matrixSet: 'default028mm',
     format: 'image/jpgpng', // ggf. auch 'image/jpgpng' testen
     projection: projection_3,
@@ -364,7 +364,7 @@ const wmtsLayerMitVersickerung = new ol.layer.Tile({
   }),
   opacity: 1,
   visible: false,
-  title: 'MaxUT_KME_mV'
+  title: 'MaxUT_KME_mV1'
 });
 
       
