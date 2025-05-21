@@ -150,8 +150,7 @@ html, body, #map {
     
      <img src="https://www.kreis-mettmann.de/media/custom/3718_9_1_k.PNG?1682505102" alt="Kreis Mettmann Logo" style="height: 20px;" />
      <img src="https://kommunalagentur.nrw/wp-content/uploads/2019/03/KuA_Logo.svg" alt="Kommunal Agentur Logo" style="height: 20px;" />
-    
-    <img src="https://pecher.de/images/logo-white.png" alt="Pecher Logo" style="height: 20px;" />
+        <img src="https://pecher.de/images/logo-white.png" alt="Pecher Logo" style="height: 20px;" />
 
   </div>
 </div>
@@ -387,7 +386,7 @@ const view = new ol.View({
 
       const map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, wmtsLayer, wmtsLayerMitVersickerung], 
+        layers: [osmLayer, wmtsLayerMitVersickerung], 
         controls: ol.control.defaults.defaults({attribution: false}).extend([attribution]),
         view: view
       });
