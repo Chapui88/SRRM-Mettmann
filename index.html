@@ -468,6 +468,9 @@ const vectorLayer = new ol.layer.Vector({
               })
      });
 ///////////////////////////////////////////////////////////////////////////////
+
+const projection = ol.proj.get('EPSG:3857');      
+      
 // 2. Vector Source mit eigenem Loader
 const wfsSource = new ol.source.Vector({
   format: new ol.format.GML32(),
