@@ -391,7 +391,7 @@ const view = new ol.View({
 
       const map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, wmtsLayerMitVersickerung], 
+        layers: [osmLayer, wmtsLayer, wmtsLayerMitVersickerung], 
         controls: ol.control.defaults.defaults({attribution: false}).extend([attribution]),
         view: view
       });
