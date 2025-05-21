@@ -266,57 +266,10 @@ html, body, #map {
     
  const key = 'EdafZNDsmwFgAOzJWLIw';
 
-      const attribution = new ol.control.Attribution({
-        collapsible: false,
-      });
-
-      const maptilerSource = new ol.source.TileJSON({
-        url: `https://api.maptiler.com/tiles/0196d83a-7729-7f95-a96b-014210c80d90/tiles.json?key=${key}`,
-        
-        tileSize: 512,
-        crossOrigin: 'anonymous'
-      });
-
-      const mapTilerLayer = new ol.layer.Tile({
-        source: maptilerSource
-      });
       
       
       
-     
-const projection = ol.proj.get('EPSG:3857');
-const projectionExtent = projection.getExtent();
-
-// Zoomlevel 9 bis 14
-const matrixIds = ['9', '10', '11', '12', '13', '14'];
-
-// Berechnung der Resolutions für die Zoomlevel 9-14
-const resolutions = matrixIds.map(z => {
-  // Maßstab aus ScaleDenominator * Standard DPI-Konvertierung
-  // Einfachheitshalber hier annähernd per Formel:
-  return (156543.03392804097 / Math.pow(2, z)); // Standard WebMercator Auflösung pro Zoomstufe
-});
-
-const wmtsLayer2 = new ol.layer.Tile({
-   opacity: 0.8, // 50% transparent
-  source: new ol.source.WMTS({
-    url: `https://api.maptiler.com/tiles/0196e918-3756-7629-a252-84dc2cf0f059/{TileMatrix}/{TileCol}/{TileRow}.webp?key=${key}`,
-    layer: 'Ohne Versickerung',
-    matrixSet: 'GoogleMapsCompatible256-z9-14',
-    format: 'image/webp',
-    style: 'default',
-    wrapX: true,
-    requestEncoding: 'REST',  // <-- DAS ist wichtig
-    tileGrid: new ol.tilegrid.WMTS({
-      origin: ol.extent.getTopLeft(projection.getExtent()),
-      resolutions: resolutions,
-      matrixIds: matrixIds,
-      tileSize: 256
-    })
-  }),
-});
-
-const projection_2 = ol.proj.get('EPSG:3857');
+ const projection_2 = ol.proj.get('EPSG:3857');
 const topLeftCorner_2 = [-20037508.342787, 20037508.342787];
 
 // Zoomstufen 14 bis 20 laut Capabilities
@@ -346,7 +299,7 @@ const tileGrid_2 = new ol.tilegrid.WMTS({
 // WMTS-Layer definieren
 const wmtsLayer = new ol.layer.Tile({
   source: new ol.source.WMTS({
-    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_oV_NO_Test/MapServer/WMTS/tile/1.0.0/MaxUT_oV_NO_Test/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_oV/MapServer/WMTS/tile/1.0.0/MaxUT_oV_NO_Test/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
     layer: 'MaxUT_oV_NO_Test',
     matrixSet: 'default028mm',
     format: 'image/jpgpng', // oder 'image/jpgpng' ausprobieren
@@ -356,7 +309,7 @@ const wmtsLayer = new ol.layer.Tile({
     requestEncoding: 'REST'
   })
 });
-
+      
     wmtsLayer.getSource().on('tileloaderror', function (event) {
   const tileCoord = event.tile.getTileCoord();
   console.warn('Tile load error at', tileCoord);
