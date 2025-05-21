@@ -347,7 +347,7 @@ const tileGrid_3 = new ol.tilegrid.WMTS({
 });
 
 // WMTS-Layer definieren
-const wmtsLayer_3 = new ol.layer.Tile({
+const wmtsLayerMitVersickerung = new ol.layer.Tile({
   source: new ol.source.WMTS({
     url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV/MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
     layer: 'MaxUT_KME_mV',
