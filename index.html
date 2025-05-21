@@ -299,27 +299,6 @@ const tileGrid_2 = new ol.tilegrid.WMTS({
   tileSize: 256
 });
 
-const matrixIds = ['14', '15', '16', '17', '18', '19'];    
-const topLeftCorner = [-20037508.342787, 20037508.342787];
-const scaleDenominators = [
-  34123.673336176726,
-  17061.836668560845,
-  8530.918334280406,
-  4265.459166667739,
-  2132.7295838063405,
-  1066.3647914307007
-];
-
-const resolutions = scaleDenominators.map(sd => sd * 0.00028);
-
-      // TileGrid erzeugen
-const tileGrid = new ol.tilegrid.WMTS({
-  origin: topLeftCorner,
-  resolutions: resolutions,
-  matrixIds: matrixIds,
-  tileSize: 256
-});
-
 
 // WMTS-Layer definieren
 const wmtsLayer = new ol.layer.Tile({
@@ -341,18 +320,49 @@ const wmtsLayer = new ol.layer.Tile({
 });
 
 
-const wmtsLayerMitVersickerung = new ol.layer.Tile({
+// Projektion und Top-Left definieren
+const projection_3 = ol.proj.get('EPSG:3857');
+const topLeftCorner_3 = [-20037508.342787, 20037508.342787];
+
+// Zoomstufen 14 bis 19 laut Capabilities
+const matrixIds_3 = ['14', '15', '16', '17', '18', '19'];
+const scaleDenominators_3 = [
+  34123.673336176726,
+  17061.836668560845,
+  8530.918334280406,
+  4265.459166667739,
+  2132.7295838063405,
+  1066.3647914307007
+];
+
+// 0.28 mm pro Pixel laut OGC → 0.00028 Meter/Pixel
+const resolutions_3 = scaleDenominators_3.map(sd => sd * 0.00028);
+
+// TileGrid erzeugen
+const tileGrid_3 = new ol.tilegrid.WMTS({
+  origin: topLeftCorner_3,
+  resolutions: resolutions_3,
+  matrixIds: matrixIds_3,
+  tileSize: 256
+});
+
+// WMTS-Layer definieren
+const wmtsLayer_3 = new ol.layer.Tile({
   source: new ol.source.WMTS({
-    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV//MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV//default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
-    layer: 'MaxUT_KME_mV/',
+    url: 'https://tiles.arcgis.com/tiles/F7pPUKI4veloy1sH/arcgis/rest/services/MaxUT_KME_mV/MapServer/WMTS/tile/1.0.0/MaxUT_KME_mV/default/default028mm/{TileMatrix}/{TileRow}/{TileCol}',
+    layer: 'MaxUT_KME_mV',
     matrixSet: 'default028mm',
-    format: 'image/jpgpng', // oder 'image/jpgpng' ausprobieren
-    projection: projection_2,
-    tileGrid: tileGrid_2,
+    format: 'image/jpgpng', // ggf. auch 'image/jpgpng' testen
+    projection: projection_3,
+    tileGrid: tileGrid_3,
     style: 'default',
     requestEncoding: 'REST'
-  })
+  }),
+  opacity: 1,
+  visible: true,
+  title: 'MaxUT_KME_mV'
 });
+
       
     wmtsLayerMitVersickerung.getSource().on('tileloaderror', function (event) {
   const tileCoord = event.tile.getTileCoord();
